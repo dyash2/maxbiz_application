@@ -1,30 +1,57 @@
+// import 'package:maxbiz_app/features/auth/domain/entities/user.dart';
+
+// enum AuthStatus {
+//   initial,
+//   loading,
+//   register,
+//   authenticated,
+//   unauthenticated,
+//   error,
+// }
+
+// class AuthState {
+//   final AuthStatus status;
+//   final User? user;
+//   final String errorMessage;
+
+//   const AuthState({required this.status, this.user, this.errorMessage = ''});
+
+//   factory AuthState.initial() {
+//     return const AuthState(status: AuthStatus.initial);
+//   }
+
+//   AuthState copyWith({AuthStatus? status, User? user, String? errorMessage}) {
+//     return AuthState(
+//       status: status ?? this.status,
+//       user: user ?? this.user,
+//       errorMessage: errorMessage ?? this.errorMessage,
+//     );
+//   }
+// }
+
+import 'package:equatable/equatable.dart';
 import 'package:maxbiz_app/features/auth/domain/entities/user.dart';
 
-enum AuthStatus {
-  initial,
-  loading,
-  register,
-  authenticated,
-  unauthenticated,
-  error,
+abstract class AuthState extends Equatable {
+  const AuthState();
+  @override
+  List<Object?> get props => [];
 }
 
-class AuthState {
-  final AuthStatus status;
-  final User? user;
-  final String errorMessage;
+class AuthInitialState extends AuthState {}
 
-  const AuthState({required this.status, this.user, this.errorMessage = ''});
+class AuthLoadingState extends AuthState {}
 
-  factory AuthState.initial() {
-    return const AuthState(status: AuthStatus.initial);
-  }
+class AuthAuthenticatedState extends AuthState {
+  final User user;
+  const AuthAuthenticatedState(this.user);
+  @override
+  List<Object?> get props => [user];
+}
 
-  AuthState copyWith({AuthStatus? status, User? user, String? errorMessage}) {
-    return AuthState(
-      status: status ?? this.status,
-      user: user ?? this.user,
-      errorMessage: errorMessage ?? this.errorMessage,
-    );
-  }
+class AuthErrorState extends AuthState {
+  final String message;
+  const AuthErrorState(this.message);
+  @override
+  List<Object?> get props => [message];
 }

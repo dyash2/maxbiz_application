@@ -1,66 +1,39 @@
-import 'dart:math';
-
 import 'package:dio/dio.dart';
+import 'package:maxbiz_app/core/utils/constants.dart';
+import '../../data/models/user_model.dart';
 
-class AuthRemoteDataSource {
-  String? _loggedInPhone;
-  final Map<String, String> _otpStore = {}; // phone → otp
-
-  // Request OTP
-  Future<String> requestOtp(String phone) async {
-    try {
-      // 🔹 Generate 6-digit random OTP
-      final otp = (Random().nextInt(900000) + 100000).toString();
-
-      // 🔹 Store OTP temporarily
-      _otpStore[phone] = otp;
-
-      // In a real app: send OTP via SMS (Twilio, API, etc.)
-      print("Generated OTP for $phone: $otp"); // demo only
-
-      return otp; // return for testing
-    } catch (e) {
-      throw ("Failed to generate OTP");
-    }
-  }
-
-  // Verify OTP
-  Future<bool> verifyOtp(String phone, String otp) async {
-    try {
-      if (_otpStore.containsKey(phone) && _otpStore[phone] == otp) {
-        _loggedInPhone = phone;
-        _otpStore.remove(phone); // clear OTP after success
-        return true;
-      } else {
-        throw ("Invalid OTP");
-      }
-    } catch (e) {
-      throw ("Failed to verify OTP");
-    }
-  }
-
-  // Log out current user
-  Future<void> logOut() async {
-    try {
-      _loggedInPhone = null;
-    } catch (e) {
-      throw ("Failed to Log Out");
-    }
-  }
-
-  // Current User
-  String? get currentUser => _loggedInPhone;
+abstract class AuthRemoteDataSource {
+  Future<UserModel> login(String username, String password);
+  Future<String> refresh(String refreshToken);
+  Future<void> logout(String refreshToken);
 }
 
-
-class AutheticationRemoteDataSource{
+class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   final Dio dio;
+  AuthRemoteDataSourceImpl(this.dio);
 
-  AutheticationRemoteDataSource(this.dio);
+  @override
+  Future<UserModel> login(String username, String password) async {
+    final res = await dio.post(
+      Constants.loginPath,
+      data: {'username': username, 'password': password},
+    );
+    return UserModel.fromJson(res.data as Map<String, dynamic>);
+  }
 
-  Future<String> requestOTP(String otp) async{
-    try{
-      final recieved = otp.
-    }
+  @override
+  Future<String> refresh(String refreshToken) async {
+    final res = await dio.post(
+      Constants.refreshPath,
+      data: {'refreshToken': refreshToken /*, 'expiresInMins': 30*/},
+      options: Options(headers: {'Authorization': null}),
+    );
+    final data = res.data as Map<String, dynamic>;
+    return (data['token'] ?? data['accessToken']).toString();
+  }
+
+  @override
+  Future<void> logout(String refreshToken) async {
+    await dio.post(Constants.logoutPath, data: {'refreshToken': refreshToken});
   }
 }
