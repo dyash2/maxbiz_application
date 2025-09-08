@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:maxbiz_app/core/themes.dart';
+import 'package:maxbazaar/core/themes.dart';
+import 'package:maxbazaar/features/presentation/pages/home_page.dart';
 
 class VerifyOtpPage extends StatefulWidget {
   const VerifyOtpPage({super.key});
@@ -9,13 +10,19 @@ class VerifyOtpPage extends StatefulWidget {
 }
 
 class _VerifyOtpPageState extends State<VerifyOtpPage> {
-  final TextEditingController _otpController = TextEditingController();
+  final int otpLength = 4;
+  final List<TextEditingController> _controllers = [];
+  final List<FocusNode> _focusNodes = [];
   int _secondsRemaining = 60;
-  int? otp = 6906;
 
   @override
   void initState() {
     super.initState();
+    for (int i = 0; i < otpLength; i++) {
+      _controllers.add(TextEditingController());
+      _focusNodes.add(FocusNode());
+    }
+    _focusNodes[0].requestFocus();
     _startTimer();
   }
 
@@ -31,9 +38,19 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
   }
 
   @override
+  void dispose() {
+    for (var controller in _controllers) {
+      controller.dispose();
+    }
+    for (var node in _focusNodes) {
+      node.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false,
       backgroundColor: Colors.grey.shade100,
       body: SafeArea(
         child: Padding(
@@ -41,89 +58,80 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              //create a back button
               Container(
-                margin: EdgeInsets.symmetric(vertical: 8),
                 decoration: BoxDecoration(
-                  color: Colors.white,
                   borderRadius: BorderRadius.circular(20),
+                  color: Colors.white,
                 ),
                 child: IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.orange),
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  icon: const Icon(Icons.arrow_back),
                 ),
               ),
               const SizedBox(height: 20),
-
-              // Title
               Text(
                 "Verify OTP",
-                style: AppFonts.lexendExtraBold.copyWith(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 30,
-                ),
+                style: AppFonts.lexendExtraBold.copyWith(fontSize: 30),
               ),
               const SizedBox(height: 10),
-
-              // Phone Number
               Text(
                 "+91 9190*****07",
                 style: AppFonts.lexendExtraBold.copyWith(
-                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
                   color: Colors.orange,
-                  fontSize: 20,
                 ),
               ),
-
-              const SizedBox(height: 10),
-              // OTP Number
-              Text(
-                otp != null ? "$otp" : "",
-                style: AppFonts.lexendBold.copyWith(
-                  fontWeight: FontWeight.bold,
-
-                  fontSize: 20,
-                ),
-              ),
-
               const SizedBox(height: 60),
 
+              // OTP Input Fields
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                spacing: 10,
-                children: List.generate(4, (index) {
-                  return Expanded(
-                    child: AspectRatio(
-                      aspectRatio: 1, // square
-                      child: TextField(
-                        maxLength: 1, // only one digit
-                        textAlign: TextAlign.center,
-                        keyboardType: TextInputType.number,
-                        cursorColor: index == 0 ? Colors.white : Colors.orange,
-                        style: AppFonts.lexendExtraBold.copyWith(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: index == 0 ? Colors.white : Colors.orange,
-                        ),
-                        decoration: InputDecoration(
-                          counterText: "",
-                          filled: true,
-                          fillColor: index == 0
-                              ? Colors.orange[700]
-                              : Colors.white,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide.none,
-                          ),
+                children: List.generate(otpLength, (index) {
+                  return SizedBox(
+                    width: 80,
+                    child: TextField(
+                      controller: _controllers[index],
+                      focusNode: _focusNodes[index],
+                      maxLength: 1,
+                      keyboardType: TextInputType.number,
+                      textAlign: TextAlign.center,
+                      style: AppFonts.lexendExtraBold.copyWith(
+                        fontSize: 28,
+                        color:
+                            _controllers[index].text.isNotEmpty &&
+                                !_focusNodes[index].hasFocus
+                            ? Colors.orange
+                            : Colors.white,
+                      ),
+                      decoration: InputDecoration(
+                        counterText: "",
+                        filled: true,
+                        fillColor: _focusNodes[index].hasFocus
+                            ? Colors.orange
+                            : Colors.white,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide.none,
                         ),
                       ),
+                      onChanged: (value) {
+                        setState(() {});
+                        if (value.isNotEmpty && index < otpLength - 1) {
+                          _focusNodes[index + 1].requestFocus();
+                        }
+                        if (value.isEmpty && index > 0) {
+                          _focusNodes[index - 1].requestFocus();
+                        }
+                      },
                     ),
                   );
                 }),
               ),
 
-              // const SizedBox(height: 20),
-
-              // Didn't receive OTP?
+              const SizedBox(height: 20),
               Center(
                 child: Text(
                   "Didn't receive OTP?",
@@ -133,20 +141,16 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
                   ),
                 ),
               ),
-
               const SizedBox(height: 10),
-
-              // Timer
               Center(
                 child: Text(
                   "00:${_secondsRemaining.toString().padLeft(2, '0')}",
                   style: AppFonts.lexendBold.copyWith(
-                    fontWeight: FontWeight.bold,
                     fontSize: 18,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
-
               const Spacer(),
 
               // Verify OTP Button
@@ -160,7 +164,12 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => HomePage()),
+                    );
+                  },
                   child: Text(
                     "Verify OTP",
                     style: AppFonts.lexendExtraBold.copyWith(

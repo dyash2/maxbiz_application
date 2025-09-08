@@ -1,4 +1,4 @@
-// import 'package:maxbiz_app/features/auth/domain/entities/user.dart';
+// import 'package:maxbazaar/features/auth/domain/entities/user.dart';
 
 // enum AuthStatus {
 //   initial,
@@ -30,7 +30,7 @@
 // }
 
 import 'package:equatable/equatable.dart';
-import 'package:maxbiz_app/features/auth/domain/entities/user.dart';
+import 'package:maxbazaar/features/auth/domain/entities/user.dart';
 
 abstract class AuthState extends Equatable {
   const AuthState();
@@ -42,8 +42,16 @@ class AuthInitialState extends AuthState {}
 
 class AuthLoadingState extends AuthState {}
 
+class AuthOTPSentState extends AuthState {
+  final int phoneNo;
+  const AuthOTPSentState(this.phoneNo);
+
+  @override
+  List<Object?> get props => [phoneNo];
+}
+
 class AuthAuthenticatedState extends AuthState {
-  final User user;
+  final Login user;
   const AuthAuthenticatedState(this.user);
   @override
   List<Object?> get props => [user];

@@ -1,4 +1,4 @@
-# maxbiz_app
+# maxbazaar
 
 A new Flutter project.
 

@@ -1,10 +1,10 @@
 import 'package:dio/dio.dart';
-import 'package:maxbiz_app/core/utils/constants.dart';
-import '../../data/models/user_model.dart';
+import 'package:maxbazaar/core/utils/constants.dart';
+import '../models/user_model.dart';
 
 abstract class AuthRemoteDataSource {
-  Future<UserModel> login(String username, String password);
-  Future<String> refresh(String refreshToken);
+  Future<LoginModel> userLogin(int phoneNo);
+  Future<LoginModel> userRegistration(int phoneNo, String role,{String? accessToken});
   Future<void> logout(String refreshToken);
 }
 
@@ -13,23 +13,30 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   AuthRemoteDataSourceImpl(this.dio);
 
   @override
-  Future<UserModel> login(String username, String password) async {
+  Future<LoginModel> userLogin(int phoneNo) async {
     final res = await dio.post(
       Constants.loginPath,
-      data: {'username': username, 'password': password},
+      data: {'phone_no': phoneNo},
     );
-    return UserModel.fromJson(res.data as Map<String, dynamic>);
+    return LoginModel.fromJson(res.data as Map<String, dynamic>);
   }
 
   @override
-  Future<String> refresh(String refreshToken) async {
+  Future<LoginModel> userRegistration(
+    int phoneNo,
+    String role, {
+    String? accessToken,
+  }) async {
     final res = await dio.post(
-      Constants.refreshPath,
-      data: {'refreshToken': refreshToken /*, 'expiresInMins': 30*/},
-      options: Options(headers: {'Authorization': null}),
+      Constants.registerPath,
+      data: {'phone_no': phoneNo, 'role': role},
+      options: Options(
+        headers: {
+          if (accessToken != null) 'Authorization': 'Bearer $accessToken',
+        },
+      ),
     );
-    final data = res.data as Map<String, dynamic>;
-    return (data['token'] ?? data['accessToken']).toString();
+    return LoginModel.fromJson(res.data as Map<String, dynamic>);
   }
 
   @override

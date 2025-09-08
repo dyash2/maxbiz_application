@@ -1,6 +1,6 @@
 {
-    "name": "maxbiz_app",
-    "short_name": "maxbiz_app",
+    "name": "maxbazaar",
+    "short_name": "maxbazaar",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

@@ -1,6 +1,7 @@
 class Constants {
-  static const baseUrl = 'https://dummyjson.com';
-  static const loginPath = '/auth/login';
-  static const refreshPath = '/auth/refresh';
-  static const logoutPath = '/auth/logout';
+  static const baseUrl = 'https://maxone.m-square.tech';
+  static const loginPath = '/app/userphonelogin';
+  static const registerPath = '/app/userphoneregistration';
+  static const refreshPath = '/app/refresh';
+  static const logoutPath = '/app/logout';
 }

@@ -61,3 +61,4 @@ class AppFonts {
     fontStyle: FontStyle.italic,
   );
 }
+

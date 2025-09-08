@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "maxbiz_app" "\0"
+            VALUE "FileDescription", "maxbazaar" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "maxbiz_app" "\0"
+            VALUE "InternalName", "maxbazaar" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2025 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "maxbiz_app.exe" "\0"
-            VALUE "ProductName", "maxbiz_app" "\0"
+            VALUE "OriginalFilename", "maxbazaar.exe" "\0"
+            VALUE "ProductName", "maxbazaar" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

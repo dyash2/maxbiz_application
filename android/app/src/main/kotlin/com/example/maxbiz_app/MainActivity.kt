@@ -1,4 +1,4 @@
-package com.example.maxbiz_app
+package com.example.maxbazaar
 
 import io.flutter.embedding.android.FlutterActivity
 

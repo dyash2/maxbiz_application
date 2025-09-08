@@ -1,4 +1,4 @@
-import 'package:maxbiz_app/features/auth/domain/repository/iauth_repository.dart';
+import 'package:maxbazaar/features/auth/domain/repository/iauth_repository.dart';
 
 class LogoutUseCase {
   final IAuthRepository repo;
