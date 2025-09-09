@@ -30,7 +30,7 @@
 // }
 
 import 'package:equatable/equatable.dart';
-import 'package:maxbazaar/features/auth/domain/entities/user.dart';
+import 'package:maxbazaar/features/auth/domain/entities/login.dart';
 
 abstract class AuthState extends Equatable {
   const AuthState();
@@ -42,12 +42,22 @@ class AuthInitialState extends AuthState {}
 
 class AuthLoadingState extends AuthState {}
 
-class AuthOTPSentState extends AuthState {
+class AuthSentOtpState extends AuthState {
   final int phoneNo;
-  const AuthOTPSentState(this.phoneNo);
+  const AuthSentOtpState(this.phoneNo);
 
+  // i also don't know  why i have used props here. it's just there
   @override
   List<Object?> get props => [phoneNo];
+}
+
+class AuthVerifyOtpState extends AuthState {
+  final int phoneNo;
+  final int otp;
+  const AuthVerifyOtpState(this.phoneNo, this.otp);
+
+  @override
+  List<Object?> get props => [phoneNo, otp];
 }
 
 class AuthAuthenticatedState extends AuthState {

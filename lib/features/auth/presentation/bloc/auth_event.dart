@@ -43,6 +43,25 @@ class RegisterRequestedEvent extends AuthEvent {
   List<Object?> get props => [phoneNo, role];
 }
 
+class SendOtpRequestedEvent extends AuthEvent {
+  final int phoneNo;
+
+  const SendOtpRequestedEvent(this.phoneNo);
+
+  @override
+  List<Object?> get props => [phoneNo];
+}
+
+class VerifyOtpRequestedEvent extends AuthEvent {
+  final int phoneNo;
+  final int otp;
+
+  const VerifyOtpRequestedEvent(this.phoneNo, this.otp);
+
+  @override
+  List<Object?> get props => [phoneNo, otp];
+}
+
 class LogoutRequestedEvent extends AuthEvent {
   const LogoutRequestedEvent();
 }

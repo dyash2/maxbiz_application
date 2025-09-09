@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:maxbazaar/features/auth/presentation/pages/splash_page.dart';
-import 'package:maxbazaar/features/presentation/pages/home_page.dart';
+import 'package:maxbazaar/features/auth/presentation/pages/auth_wrapper.dart';
+import 'package:maxbazaar/features/auth/presentation/pages/login_page.dart';
 import 'package:maxbazaar/injection_dependency.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
-import 'features/auth/presentation/pages/login_page.dart';
 
 void main() async {
   // Intialize the flutter binding
@@ -27,7 +26,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'Max Bazaar',
         theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.indigo),
-        home: HomePage(),
+        home: AuthWrapper(),
       ),
     );
   }

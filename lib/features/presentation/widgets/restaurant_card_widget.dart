@@ -21,48 +21,74 @@ class RestaurantCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    return Container(
+      color: Colors.transparent,
       margin: const EdgeInsets.symmetric(vertical: 8),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // 🖼 Image with aspect ratio
-          ClipRRect(
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(12),
-              bottomLeft: Radius.circular(12),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: SizedBox(
-                width: 100,
-                child: AspectRatio(
-                  aspectRatio: 1, // Square ratio
+          Expanded(
+            flex: 2,
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 8,
+                    offset: const Offset(2, 4),
+                  ),
+                ],
+              ),
+              padding: const EdgeInsets.only(left: 8, top: 8, bottom: 8),
+              child: AspectRatio(
+                aspectRatio: 9 / 12,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
                   child: Image.asset(image, fit: BoxFit.cover),
                 ),
               ),
             ),
           ),
-
           // 📝 Info section
           Expanded(
+            flex: 4,
             child: Padding(
               padding: const EdgeInsets.all(12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    name,
-                    style: AppFonts.lexendBold.copyWith(fontSize: 16),
-                    maxLines: 2,
-                    overflow: TextOverflow.visible,
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Text should expand and take available space
+                      Expanded(
+                        child: Text(
+                          name,
+                          style: AppFonts.lexendBold.copyWith(fontSize: 18),
+                          maxLines: 2,
+                          overflow: TextOverflow
+                              .ellipsis, // use ellipsis instead of visible
+                        ),
+                      ),
+                      const SizedBox(width: 2),
+                      // Icons stacked vertically
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: const [
+                          Icon(Icons.favorite, color: Colors.redAccent),
+                        ],
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 4),
 
                   // ⭐ Rating + Veg/Non-Veg
                   Row(
                     children: [
-                      Icon(Icons.star, size: 16, color: Colors.orange),
+                      Image.asset("assets/icons/star_rating.png", scale: 5),
                       const SizedBox(width: 4),
                       Text(
                         rating.toStringAsFixed(1),

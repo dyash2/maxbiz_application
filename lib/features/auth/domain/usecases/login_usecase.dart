@@ -1,4 +1,4 @@
-import 'package:maxbazaar/features/auth/domain/entities/user.dart';
+import 'package:maxbazaar/features/auth/domain/entities/login.dart';
 import 'package:maxbazaar/features/auth/domain/repository/iauth_repository.dart';
 
 class LoginUseCase {

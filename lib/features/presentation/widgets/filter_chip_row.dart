@@ -19,7 +19,7 @@ class _FilterChipsRowState extends State<FilterChipsRow> {
       children: [
         FilterChipOption(
           label: "Veg",
-          iconImage: "assets/icons/veg.png", // ✅ green circle for Veg
+          iconImage: "assets/icons/veg.png",
           selected: selected == "Veg",
           onTap: () {
             setState(() => selected = selected == "Veg" ? null : "Veg");
@@ -27,7 +27,7 @@ class _FilterChipsRowState extends State<FilterChipsRow> {
         ),
         FilterChipOption(
           label: "Non Veg",
-          iconImage: "assets/icons/nonveg.png", // ✅ red circle for Non-Veg
+          iconImage: "assets/icons/nonveg.png",
           selected: selected == "Non Veg",
           onTap: () {
             setState(() => selected = selected == "Non Veg" ? null : "Non Veg");
@@ -35,7 +35,6 @@ class _FilterChipsRowState extends State<FilterChipsRow> {
         ),
         FilterChipOption(
           label: "Jain",
-          // icon: Icons.circle, // ✅ red circle for Non-Veg
           selected: selected == "Jain",
           onTap: () {
             setState(() => selected = selected == "Jain" ? null : "Jain");

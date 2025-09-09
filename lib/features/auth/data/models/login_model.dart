@@ -1,4 +1,4 @@
-import 'package:maxbazaar/features/auth/domain/entities/user.dart';
+import 'package:maxbazaar/features/auth/domain/entities/login.dart';
 
 class LoginModel extends Login {
   const LoginModel({

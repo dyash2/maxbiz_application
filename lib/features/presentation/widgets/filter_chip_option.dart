@@ -22,9 +22,15 @@ class FilterChipOption extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: selected ? Colors.black : Colors.white,
+          color: selected ? Colors.greenAccent.shade100 : Colors.white,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.grey.shade300),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 8,
+              offset: const Offset(2, 4),
+            ),
+          ],
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -40,20 +46,13 @@ class FilterChipOption extends StatelessWidget {
             Text(
               label,
               style: AppFonts.lexendBold.copyWith(
-                color: selected ? Colors.white : Colors.black,
+                color: selected ? Colors.black : Colors.black,
                 fontWeight: FontWeight.w500,
               ),
             ),
             if (selected) ...[
               const SizedBox(width: 6),
-              Container(
-                padding: const EdgeInsets.all(2),
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white,
-                ),
-                child: const Icon(Icons.close, size: 14, color: Colors.black),
-              ),
+              const Icon(Icons.close, size: 14, color: Colors.black),
             ],
           ],
         ),

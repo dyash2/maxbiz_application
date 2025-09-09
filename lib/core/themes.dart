@@ -62,3 +62,10 @@ class AppFonts {
   );
 }
 
+class AppColors {
+  static const Color primaryColor = Color(0xFF4CAF50); // Example primary color
+  static const Color accentColor = Color(0xFFFFC107); // Example accent color
+  static const Color textSecondaryColor = Color(
+    0xFD7F2CCC,
+  ); // Example text color
+}

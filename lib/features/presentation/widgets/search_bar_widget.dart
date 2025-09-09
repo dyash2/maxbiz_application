@@ -1,21 +1,22 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:maxbazaar/core/themes.dart';
 
-class CustomSearchBar extends StatefulWidget {
+class SearchBarWidget extends StatefulWidget {
   final List<String> suggestions;
   final ValueChanged<String>? onChanged;
 
-  const CustomSearchBar({
+  const SearchBarWidget({
     super.key,
-    this.suggestions = const ["Vada Pav", "Bhaji Pav", "Pani Puri"],
+    this.suggestions = const ['" Food "', '"Restaurants"'],
     this.onChanged,
   });
 
   @override
-  State<CustomSearchBar> createState() => _CustomSearchBarState();
+  State<SearchBarWidget> createState() => _SearchBarWidgetState();
 }
 
-class _CustomSearchBarState extends State<CustomSearchBar> {
+class _SearchBarWidgetState extends State<SearchBarWidget> {
   late final PageController _pageController;
   int _currentIndex = 0;
   Timer? _timer;
@@ -48,45 +49,52 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
   @override
   Widget build(BuildContext context) {
     return TextField(
+      style: AppFonts.lexendRegular.copyWith(
+        color: Colors.black,
+        letterSpacing: 1,
+        fontSize: 16,
+      ),
       onChanged: widget.onChanged,
       decoration: InputDecoration(
         hint: Row(
           mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               "Search for ",
-              style: TextStyle(
+              style: AppFonts.lexendBold.copyWith(
                 color: Colors.grey,
                 fontWeight: FontWeight.normal,
                 fontSize: 16,
               ),
             ),
-            SizedBox(
-              height: 20, // fix height for sliding text
-              width: 100, // ensure space reserved for longest word
-              child: PageView.builder(
-                controller: _pageController,
-                scrollDirection: Axis.vertical,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: widget.suggestions.length,
-                itemBuilder: (context, index) {
-                  return Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4.0),
+              child: SizedBox(
+                height: 20,
+                width: 100,
+                child: PageView.builder(
+                  controller: _pageController,
+                  scrollDirection: Axis.vertical,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: widget.suggestions.length,
+                  itemBuilder: (context, index) {
+                    return Text(
                       widget.suggestions[index],
-                      style: const TextStyle(
-                        color: Colors.black,
+                      style: AppFonts.pacifico.copyWith(
+                        color: AppColors.textSecondaryColor,
                         fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                        fontSize: 14,
+                        overflow: TextOverflow.visible
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
             ),
           ],
         ),
-        prefixIcon: const Icon(Icons.search, color: Colors.grey),
+        prefixIcon: Icon(Icons.search, color: Colors.orange.shade300),
         filled: true,
         fillColor: Colors.white,
         contentPadding: const EdgeInsets.symmetric(

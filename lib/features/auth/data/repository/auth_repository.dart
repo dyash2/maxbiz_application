@@ -1,10 +1,10 @@
 import 'dart:developer';
-
 import 'package:dio/dio.dart';
 import 'package:maxbazaar/core/error/exceptions.dart';
 import 'package:maxbazaar/core/storage/token_storage.dart';
 import 'package:maxbazaar/features/auth/data/data_sources/auth_remote_data_source.dart';
-import 'package:maxbazaar/features/auth/domain/entities/user.dart';
+import 'package:maxbazaar/features/auth/domain/entities/otp.dart';
+import 'package:maxbazaar/features/auth/domain/entities/login.dart';
 import 'package:maxbazaar/features/auth/domain/repository/iauth_repository.dart';
 
 class AuthRepositoryImpl implements IAuthRepository {
@@ -17,12 +17,17 @@ class AuthRepositoryImpl implements IAuthRepository {
   Future<Login> userLogin({required int phoneNo}) async {
     try {
       final model = await remote.userLogin(phoneNo);
+
+      // Save tokens if present
       if (model.access != null) {
         await storage.saveAccessToken(model.access!);
+        log("Access Token Saved: ${model.access}");
       }
       if (model.refresh != null) {
         await storage.saveRefreshToken(model.refresh!);
+        log("Refresh Token Saved: ${model.refresh}");
       }
+
       return model;
     } on DioException catch (e) {
       final message = e.response?.data['message'] ?? 'Login failed';
@@ -66,6 +71,36 @@ class AuthRepositoryImpl implements IAuthRepository {
       );
     } catch (_) {
       throw ServerException('Registration failed', null);
+    }
+  }
+
+  @override
+  Future<Otp> sendOtp({required int phoneNo}) async {
+    try {
+      final model = await remote.sendOtp(phoneNo);
+      return model;
+    } on DioException catch (e) {
+      throw ServerException(
+        e.response?.data['message'] ?? 'Send OTP failed',
+        e.response?.statusCode,
+      );
+    } catch (_) {
+      throw ServerException('Send OTP failed', null);
+    }
+  }
+
+  @override
+  Future<Otp> verifyOtp({required int phoneNo, required int otp}) async {
+    try {
+      final model = await remote.verifyOtp(phoneNo, otp);
+      return model;
+    } on DioException catch (e) {
+      throw ServerException(
+        e.response?.data['message'] ?? 'Verify OTP failed',
+        e.response?.statusCode,
+      );
+    } catch (_) {
+      throw ServerException('Verify OTP failed', null);
     }
   }
 

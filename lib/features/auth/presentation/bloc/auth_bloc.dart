@@ -1,9 +1,12 @@
 import 'dart:developer';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:maxbazaar/features/auth/domain/entities/user.dart';
+import 'package:maxbazaar/features/auth/domain/entities/login.dart';
+import 'package:maxbazaar/features/auth/domain/entities/otp.dart';
 import 'package:maxbazaar/features/auth/domain/usecases/login_usecase.dart';
 import 'package:maxbazaar/features/auth/domain/usecases/logout_usecase.dart';
 import 'package:maxbazaar/features/auth/domain/usecases/registration_usecase.dart';
+import 'package:maxbazaar/features/auth/domain/usecases/sendOtp_usecase.dart';
+import 'package:maxbazaar/features/auth/domain/usecases/verifyOtp_usecase.dart';
 import 'package:maxbazaar/features/auth/presentation/bloc/auth_event.dart';
 import 'package:maxbazaar/features/auth/presentation/bloc/auth_state.dart';
 
@@ -11,15 +14,21 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final LoginUseCase loginUseCase;
   final RegistrationUsecase registrationUsecase;
   final LogoutUseCase logoutUseCase;
+  final SendotpUsecase sendotpUsecase;
+  final VerifyotpUsecase verifyotpUsecase;
 
   AuthBloc({
     required this.loginUseCase,
     required this.registrationUsecase,
     required this.logoutUseCase,
+    required this.sendotpUsecase,
+    required this.verifyotpUsecase,
   }) : super(AuthInitialState()) {
     on<LoginRequestedEvent>(_onLoginRequested);
     on<RegisterRequestedEvent>(_onRegisterRequested);
     on<LogoutRequestedEvent>(_onLogoutRequested);
+    on<SendOtpRequestedEvent>(_onSendOtpRequested);
+    on<VerifyOtpRequestedEvent>(_onVerifyOtpRequested);
   }
 
   Future<void> _onLoginRequested(
@@ -30,6 +39,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       final Login user = await loginUseCase(phoneNo: event.phoneNo);
       emit(AuthAuthenticatedState(user));
+      // 👇 Log the API response
+      log("Login API Response: ${user.toJson()}");
     } catch (e, stackTrace) {
       // Print actual error for debugging
       log("Login Error: $e", stackTrace: stackTrace);
@@ -50,9 +61,43 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         role: event.role,
       );
       emit(AuthAuthenticatedState(user));
+      log("Registration API Response: ${user.toJson()}");
     } catch (e, stackTrace) {
       log("Registration Error: $e", stackTrace: stackTrace);
       emit(const AuthErrorState("Registration Failed"));
+    }
+  }
+
+  Future<void> _onSendOtpRequested(
+    SendOtpRequestedEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthLoadingState());
+    try {
+      final Otp otp = await sendotpUsecase(phoneNo: event.phoneNo);
+      emit(AuthSentOtpState(event.phoneNo));
+      log("SendOTP API Response: ${otp.toJson()}");
+    } catch (e, stackTrace) {
+      log("Send OTP Error : $e", stackTrace: stackTrace);
+      emit(const AuthErrorState("Send OTP Failed"));
+    }
+  }
+
+  Future<void> _onVerifyOtpRequested(
+    VerifyOtpRequestedEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthLoadingState());
+    try {
+      final Otp otp = await verifyotpUsecase(
+        phoneNo: event.phoneNo,
+        otp: event.otp,
+      );
+      emit(AuthVerifyOtpState(event.phoneNo, event.otp));
+      log("VerifyOTP API Response: ${otp.toJson()}");
+    } catch (e, stackTrace) {
+      log("Verify OTP Error: $e", stackTrace: stackTrace);
+      emit(const AuthErrorState("Verify OTP Failed"));
     }
   }
 

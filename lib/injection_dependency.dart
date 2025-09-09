@@ -1,6 +1,8 @@
 import 'package:get_it/get_it.dart';
 import 'package:dio/dio.dart';
 import 'package:maxbazaar/features/auth/domain/usecases/registration_usecase.dart';
+import 'package:maxbazaar/features/auth/domain/usecases/sendOtp_usecase.dart';
+import 'package:maxbazaar/features/auth/domain/usecases/verifyOtp_usecase.dart';
 import 'core/storage/token_storage.dart';
 import 'core/network/dio_client.dart';
 import 'package:maxbazaar/features/auth/data/data_sources/auth_remote_data_source.dart';
@@ -38,9 +40,19 @@ Future<void> setup() async {
   );
 
   // Use cases
-  locator.registerLazySingleton(() => RegistrationUsecase(locator<IAuthRepository>()));
+  locator.registerLazySingleton(
+    () => RegistrationUsecase(locator<IAuthRepository>()),
+  );
   locator.registerLazySingleton(() => LoginUseCase(locator<IAuthRepository>()));
-  locator.registerLazySingleton(() => LogoutUseCase(locator<IAuthRepository>()));
+  locator.registerLazySingleton(
+    () => LogoutUseCase(locator<IAuthRepository>()),
+  );
+  locator.registerLazySingleton(
+    () => SendotpUsecase(locator<IAuthRepository>()),
+  );
+  locator.registerLazySingleton(
+    () => VerifyotpUsecase(locator<IAuthRepository>()),
+  );
 
   // Bloc
   locator.registerFactory(
@@ -48,6 +60,8 @@ Future<void> setup() async {
       registrationUsecase: locator<RegistrationUsecase>(),
       loginUseCase: locator<LoginUseCase>(),
       logoutUseCase: locator<LogoutUseCase>(),
+      sendotpUsecase: locator<SendotpUsecase>(),
+      verifyotpUsecase: locator<VerifyotpUsecase>(),
     ),
   );
 }
