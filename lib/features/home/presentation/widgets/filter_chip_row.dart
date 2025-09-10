@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:maxbazaar/features/presentation/widgets/filter_chip_option.dart';
+import 'package:maxbazaar/features/home/presentation/widgets/filter_chip_option.dart';
 
 class FilterChipsRow extends StatefulWidget {
   const FilterChipsRow({super.key});

@@ -60,6 +60,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         phoneNo: event.phoneNo,
         role: event.role,
       );
+      // emit(AuthRegisterState(event.phoneNo, event.role));
       emit(AuthAuthenticatedState(user));
       log("Registration API Response: ${user.toJson()}");
     } catch (e, stackTrace) {
@@ -75,7 +76,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthLoadingState());
     try {
       final Otp otp = await sendotpUsecase(phoneNo: event.phoneNo);
-      emit(AuthSentOtpState(event.phoneNo));
+      emit(AuthSentOtpState(otp));
       log("SendOTP API Response: ${otp.toJson()}");
     } catch (e, stackTrace) {
       log("Send OTP Error : $e", stackTrace: stackTrace);
@@ -93,7 +94,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         phoneNo: event.phoneNo,
         otp: event.otp,
       );
-      emit(AuthVerifyOtpState(event.phoneNo, event.otp));
+      emit(AuthVerifyOtpState(otp));
       log("VerifyOTP API Response: ${otp.toJson()}");
     } catch (e, stackTrace) {
       log("Verify OTP Error: $e", stackTrace: stackTrace);

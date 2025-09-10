@@ -15,7 +15,7 @@ import 'features/auth/presentation/bloc/auth_bloc.dart';
 final locator = GetIt.instance;
 
 Future<void> setup() async {
-  // External
+  // External 
   locator.registerLazySingleton<Dio>(() => Dio());
 
   // Storage
@@ -26,7 +26,7 @@ Future<void> setup() async {
     () => DioClient(locator<Dio>(), locator<TokenStorage>()),
   );
 
-  // Data sources (use the Dio inside DioClient so it has interceptor)
+  // Data sources (using the Dio inside DioClient so it has interceptor)
   locator.registerLazySingleton<AuthRemoteDataSource>(
     () => AuthRemoteDataSourceImpl(locator<DioClient>().dio),
   );

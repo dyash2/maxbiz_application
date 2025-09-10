@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:maxbazaar/features/auth/presentation/pages/auth_wrapper.dart';
-import 'package:maxbazaar/features/auth/presentation/pages/login_page.dart';
+import 'package:maxbazaar/core/routes/app_routes.dart';
+import 'package:maxbazaar/features/auth/presentation/pages/practice_page.dart';
 import 'package:maxbazaar/injection_dependency.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 
@@ -24,9 +24,11 @@ class MyApp extends StatelessWidget {
       create: (_) => locator<AuthBloc>(),
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
+        // initialRoute: AppRoutes.authWrapper,
+        // onGenerateRoute: AppRoutes.generateRoute,
+        home: PracticePage(),
         title: 'Max Bazaar',
         theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.indigo),
-        home: AuthWrapper(),
       ),
     );
   }

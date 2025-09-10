@@ -1,13 +1,16 @@
+import 'dart:async';
 import 'dart:math';
-
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:maxbazaar/core/routes/app_routes.dart';
 import 'package:maxbazaar/core/themes.dart';
 import 'package:maxbazaar/features/auth/domain/entities/otp.dart';
 import 'package:maxbazaar/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:maxbazaar/features/auth/presentation/bloc/auth_event.dart';
 import 'package:maxbazaar/features/auth/presentation/bloc/auth_state.dart';
-import 'package:maxbazaar/features/presentation/pages/home_page.dart';
+import 'package:maxbazaar/features/auth/presentation/widgets/custom_button.dart';
+import 'package:maxbazaar/features/home/presentation/pages/home_page.dart';
 
 class VerifyOtpPage extends StatefulWidget {
   final String phoneNo;
@@ -23,6 +26,7 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
   final List<FocusNode> _focusNodes = [];
   int _secondsRemaining = 60;
   final List<Otp> _otp = [];
+  Timer? _timer;
 
   @override
   void initState() {
@@ -36,13 +40,16 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
   }
 
   void _startTimer() {
-    Future.doWhile(() async {
-      await Future.delayed(const Duration(seconds: 1));
-      if (_secondsRemaining == 0) return false;
-      setState(() {
-        _secondsRemaining--;
-      });
-      return true;
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_secondsRemaining == 0) {
+        timer.cancel();
+      } else {
+        if (mounted) {
+          setState(() {
+            _secondsRemaining--;
+          });
+        }
+      }
     });
   }
 
@@ -54,7 +61,7 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
     for (var node in _focusNodes) {
       node.dispose();
     }
-    _startTimer();
+    _timer?.cancel();
     super.dispose();
   }
 
@@ -63,20 +70,14 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
       body: BlocConsumer<AuthBloc, AuthState>(
-        listener: (context, state) {
-          if (state is AuthAuthenticatedState) {
-            Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(builder: (_) => HomePage()),
-              (route) => false,
-            );
-          } else if (state is AuthErrorState) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(state.message)));
-          }
-        },
+        listener: (context, state) {},
         builder: (context, state) {
           final isLoading = state is AuthLoadingState;
+          if (state is AuthLoadingState){
+            return const Center(child: CircularProgressIndicator());
+          } else if (state is AuthVerifyOtpState){
+            
+          }
           return SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(20),
@@ -91,7 +92,10 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
                     ),
                     child: IconButton(
                       onPressed: () {
-                        Navigator.pop(context);
+                        Navigator.pushReplacementNamed(
+                          context,
+                          AppRoutes.login,
+                        );
                       },
                       icon: const Icon(Icons.arrow_back),
                     ),
@@ -103,7 +107,7 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    "91 +{${widget.phoneNo}}",
+                    "91 +${widget.phoneNo}",
                     style: AppFonts.lexendExtraBold.copyWith(
                       fontSize: 20,
                       color: Colors.orange,
@@ -130,6 +134,9 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
                                 ? Colors.orange
                                 : Colors.white,
                           ),
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
                           decoration: InputDecoration(
                             counterText: "",
                             filled: true,
@@ -178,17 +185,10 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
                   const Spacer(),
 
                   // Verify OTP Button
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blueGrey.shade300,
-                        padding: const EdgeInsets.symmetric(vertical: 20),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      onPressed: isLoading
+                  CustomButton(
+                    text: "Verify OTP",
+                    onPressed: () {
+                      isLoading
                           ? null
                           : () {
                               final phoneNo = widget.phoneNo;
@@ -224,15 +224,8 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
                                   ),
                                 );
                               }
-                            },
-                      child: Text(
-                        "Verify OTP",
-                        style: AppFonts.lexendExtraBold.copyWith(
-                          color: Colors.white,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
+                            };
+                    },
                   ),
                 ],
               ),

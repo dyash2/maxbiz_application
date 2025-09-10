@@ -26,7 +26,6 @@ class _SplashPageState extends State<SplashPage> {
     final status = await Permission.location.request();
 
     if (status.isGranted) {
-      // Permission granted → wait for splash duration
       await Future.delayed(const Duration(seconds: 4));
       if (!mounted) return;
       Navigator.pushReplacement(
@@ -34,33 +33,7 @@ class _SplashPageState extends State<SplashPage> {
         MaterialPageRoute(builder: (_) => const LoginPage()),
       );
     } else if (status.isDenied || status.isPermanentlyDenied) {
-      // Show modal
       _permanentlyDenied = status.isPermanentlyDenied;
-      _showPermissionModal();
-    }
-  }
-
-  Future<void> _startTimer() async {
-    await Future.delayed(const Duration(seconds: 3));
-    if (!mounted) return;
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const LoginPage()),
-    );
-  }
-
-  Future<void> _requestLocationPermission() async {
-    final status = await Permission.location.request();
-
-    if (status.isGranted) {
-      debugPrint("✅ Location permission granted");
-    } else if (status.isDenied) {
-      debugPrint("⚠️ Location permission denied");
-      _permanentlyDenied = false;
-      _showPermissionModal();
-    } else if (status.isPermanentlyDenied) {
-      debugPrint("❌ Location permission permanently denied");
-      _permanentlyDenied = true;
       _showPermissionModal();
     }
   }

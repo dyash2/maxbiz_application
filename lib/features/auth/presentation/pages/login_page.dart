@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:maxbazaar/core/routes/app_routes.dart';
 import 'package:maxbazaar/core/themes.dart';
-import 'package:maxbazaar/core/utils/constants.dart';
+import 'package:maxbazaar/core/utils/utils.dart';
 import 'package:maxbazaar/features/auth/presentation/pages/verify_otp_page.dart';
+import 'package:maxbazaar/features/auth/presentation/widgets/custom_button.dart';
 import '../../presentation/bloc/auth_bloc.dart';
 import '../../presentation/bloc/auth_event.dart';
 import '../../presentation/bloc/auth_state.dart';
@@ -57,7 +60,7 @@ class _LoginPageState extends State<LoginPage> {
                     children: [
                       // Top Carousel
                       Expanded(
-                        flex: isMobile ? 6 : 4,
+                        flex: isMobile ? 5 : 4,
                         child: Stack(
                           alignment: Alignment.bottomCenter,
                           children: [
@@ -123,7 +126,11 @@ class _LoginPageState extends State<LoginPage> {
                                 style: AppFonts.lexendBold.copyWith(
                                   fontSize: isMobile ? 18 : 22,
                                 ),
-                                keyboardType: TextInputType.phone,
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                ],
+                                maxLength: 10,
                                 decoration: InputDecoration(
                                   filled: true,
                                   fillColor: Colors.grey.shade200,
@@ -144,19 +151,10 @@ class _LoginPageState extends State<LoginPage> {
                               const SizedBox(height: 20),
 
                               // Continue button
-                              SizedBox(
-                                width: double.infinity,
-                                child: ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.blueGrey[300],
-                                    padding: EdgeInsets.symmetric(
-                                      vertical: isMobile ? 16 : 20,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                  ),
-                                  onPressed: isLoading
+                              CustomButton(
+                                text: isLoading ? 'Signing in...' : 'Continue',
+                                onPressed: () {
+                                  isLoading
                                       ? null
                                       : () {
                                           final phoneNo = int.tryParse(
@@ -165,6 +163,11 @@ class _LoginPageState extends State<LoginPage> {
                                           if (phoneNo != null) {
                                             context.read<AuthBloc>().add(
                                               SendOtpRequestedEvent(phoneNo),
+                                            );
+                                          } else if (phoneNo == null) {
+                                            SnackBarUtils.showWarning(
+                                              context,
+                                              "Please Enter your mobile before continuing",
                                             );
                                           } else {
                                             ScaffoldMessenger.of(
@@ -177,16 +180,10 @@ class _LoginPageState extends State<LoginPage> {
                                               ),
                                             );
                                           }
-                                        },
-                                  child: Text(
-                                    isLoading ? 'Signing in...' : 'Continue',
-                                    style: AppFonts.lexendExtraBold.copyWith(
-                                      color: Colors.white,
-                                      fontSize: isMobile ? 16 : 20,
-                                    ),
-                                  ),
-                                ),
+                                        };
+                                },
                               ),
+
                               const SizedBox(height: 10),
 
                               // OR divider
@@ -205,33 +202,13 @@ class _LoginPageState extends State<LoginPage> {
                               const SizedBox(height: 10),
 
                               // Continue as Guest button
-                              SizedBox(
-                                width: double.infinity,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10),
-                                    color: Colors.deepPurpleAccent.shade700,
-                                  ),
-                                  child: ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.transparent,
-                                      shadowColor: Colors.transparent,
-                                      padding: EdgeInsets.symmetric(
-                                        vertical: isMobile ? 16 : 20,
-                                      ),
-                                    ),
-                                    onPressed: () {
-                                      // Guest flow here
-                                    },
-                                    child: Text(
-                                      "Continue As Guest",
-                                      style: AppFonts.lexendExtraBold.copyWith(
-                                        color: Colors.white,
-                                        fontSize: isMobile ? 16 : 20,
-                                      ),
-                                    ),
-                                  ),
-                                ),
+                              CustomButton(
+                                text: "Continue As Guest",
+                                textColor: Colors.white,
+                                bgColor: Colors.deepPurpleAccent.shade700,
+                                onPressed: () {
+                                  Navigator.pushNamed(context, AppRoutes.home);
+                                },
                               ),
                               const Spacer(),
 

@@ -4,7 +4,7 @@ import 'package:maxbazaar/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:maxbazaar/features/auth/presentation/bloc/auth_state.dart';
 import 'package:maxbazaar/features/auth/presentation/pages/login_page.dart';
 import 'package:maxbazaar/features/auth/presentation/pages/splash_page.dart';
-import 'package:maxbazaar/features/presentation/pages/home_page.dart';
+import 'package:maxbazaar/features/home/presentation/pages/home_page.dart';
 
 class AuthWrapper extends StatelessWidget {
   const AuthWrapper({super.key});
