@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 class Constants {
   static const baseUrl = 'https://maxone.m-square.tech';
   static const loginPath = '/app/userphonelogin';
@@ -7,6 +9,8 @@ class Constants {
   static const sendOtpPath = '/app/send-otp';
   static const verifyOtpPath = '/app/verify-otp';
 }
+
+
 
 class ScreenSize {
   static const double isMobile = 600;

@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:dio/dio.dart';
 import '../storage/token_storage.dart';
-import '../utils/constants.dart';
+import '../utils/constants/constants.dart';
 
 class DioClient {
   final Dio dio;

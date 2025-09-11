@@ -1,11 +1,14 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:maxbazaar/core/routes/app_routes.dart';
 import 'package:maxbazaar/core/themes.dart';
-import 'package:maxbazaar/core/utils/utils.dart';
+import 'package:maxbazaar/core/utils/constants/constants.dart';
+import 'package:maxbazaar/core/utils/snackbar_utils.dart';
 import 'package:maxbazaar/features/auth/presentation/pages/verify_otp_page.dart';
 import 'package:maxbazaar/features/auth/presentation/widgets/custom_button.dart';
+import 'package:maxbazaar/features/home/presentation/pages/home_page.dart';
 import '../../presentation/bloc/auth_bloc.dart';
 import '../../presentation/bloc/auth_event.dart';
 import '../../presentation/bloc/auth_state.dart';
@@ -21,6 +24,20 @@ class _LoginPageState extends State<LoginPage> {
   final _phoneNoCtrl = TextEditingController(text: '');
   final PageController _pageController = PageController();
   int _currentPage = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _phoneNoCtrl.addListener(() {
+      setState(() {}); // rebuild UI when text changes
+    });
+  }
+
+  @override
+  void dispose() {
+    _phoneNoCtrl.dispose();
+    super.dispose();
+  }
 
   final List<String> images = [
     "assets/icons/food1.jpg",
@@ -53,6 +70,10 @@ class _LoginPageState extends State<LoginPage> {
             builder: (context, constraints) {
               final screenWidth = constraints.maxWidth;
               final isMobile = screenWidth < 600;
+              final phoneNo = _phoneNoCtrl.text.trim();
+              final phoneNoLength = phoneNo.length;
+
+              log("Phone number length: $phoneNoLength");
 
               return SafeArea(
                 child: Center(
@@ -132,6 +153,7 @@ class _LoginPageState extends State<LoginPage> {
                                 ],
                                 maxLength: 10,
                                 decoration: InputDecoration(
+                                  counterText: "",
                                   filled: true,
                                   fillColor: Colors.grey.shade200,
                                   hintText: "Enter mobile number to Login",
@@ -139,8 +161,9 @@ class _LoginPageState extends State<LoginPage> {
                                     color: Colors.grey,
                                     fontSize: isMobile ? 16 : 20,
                                   ),
-                                  prefixIcon: const Icon(
-                                    Icons.dialer_sip_sharp,
+                                  prefixIcon: Icon(
+                                    Icons.phone,
+                                    color: Colors.blueGrey.shade500,
                                   ),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(10),
@@ -152,36 +175,29 @@ class _LoginPageState extends State<LoginPage> {
 
                               // Continue button
                               CustomButton(
+                                bgColor: _phoneNoCtrl.text.trim().length == 10
+                                    ? Colors.orange
+                                    : ButtonColor.bgColor,
                                 text: isLoading ? 'Signing in...' : 'Continue',
-                                onPressed: () {
-                                  isLoading
-                                      ? null
-                                      : () {
-                                          final phoneNo = int.tryParse(
-                                            _phoneNoCtrl.text.trim(),
+                                onPressed:
+                                    (_phoneNoCtrl.text.trim().length == 10 &&
+                                        !isLoading)
+                                    ? () {
+                                        final phoneNo = int.tryParse(
+                                          _phoneNoCtrl.text.trim(),
+                                        );
+                                        if (phoneNo != null) {
+                                          context.read<AuthBloc>().add(
+                                            SendOtpRequestedEvent(phoneNo),
                                           );
-                                          if (phoneNo != null) {
-                                            context.read<AuthBloc>().add(
-                                              SendOtpRequestedEvent(phoneNo),
-                                            );
-                                          } else if (phoneNo == null) {
-                                            SnackBarUtils.showWarning(
-                                              context,
-                                              "Please Enter your mobile before continuing",
-                                            );
-                                          } else {
-                                            ScaffoldMessenger.of(
-                                              context,
-                                            ).showSnackBar(
-                                              const SnackBar(
-                                                content: Text(
-                                                  "Enter valid phone number",
-                                                ),
-                                              ),
-                                            );
-                                          }
-                                        };
-                                },
+                                        } else {
+                                          SnackBarUtils.showWarning(
+                                            context,
+                                            "Enter a valid 10-digit phone number",
+                                          );
+                                        }
+                                      }
+                                    : null, // disabled if not valid
                               ),
 
                               const SizedBox(height: 10),
@@ -207,7 +223,13 @@ class _LoginPageState extends State<LoginPage> {
                                 textColor: Colors.white,
                                 bgColor: Colors.deepPurpleAccent.shade700,
                                 onPressed: () {
-                                  Navigator.pushNamed(context, AppRoutes.home);
+                                  Navigator.pushAndRemoveUntil(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => HomePage(),
+                                    ),
+                                    (route) => false,
+                                  );
                                 },
                               ),
                               const Spacer(),

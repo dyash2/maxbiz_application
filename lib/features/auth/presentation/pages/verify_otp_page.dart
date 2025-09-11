@@ -1,14 +1,15 @@
 import 'dart:async';
-import 'dart:math';
+import 'dart:math' as m;
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:maxbazaar/core/routes/app_routes.dart';
 import 'package:maxbazaar/core/themes.dart';
-import 'package:maxbazaar/features/auth/domain/entities/otp.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:maxbazaar/core/storage/token_storage.dart';
 import 'package:maxbazaar/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:maxbazaar/features/auth/presentation/bloc/auth_event.dart';
 import 'package:maxbazaar/features/auth/presentation/bloc/auth_state.dart';
+import 'package:maxbazaar/features/auth/presentation/pages/login_page.dart';
 import 'package:maxbazaar/features/auth/presentation/widgets/custom_button.dart';
 import 'package:maxbazaar/features/home/presentation/pages/home_page.dart';
 
@@ -21,12 +22,13 @@ class VerifyOtpPage extends StatefulWidget {
 }
 
 class _VerifyOtpPageState extends State<VerifyOtpPage> {
-  final int otpLength = 4;
+  final tokenStorage = SharedPrefsTokenStorage();
   final List<TextEditingController> _controllers = [];
   final List<FocusNode> _focusNodes = [];
   int _secondsRemaining = 60;
-  final List<Otp> _otp = [];
+  final int otpLength = 4;
   Timer? _timer;
+  bool _canResend = false; // ✅ Track if user can resend
 
   @override
   void initState() {
@@ -40,9 +42,12 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
   }
 
   void _startTimer() {
+    _secondsRemaining = 60;
+    _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_secondsRemaining == 0) {
         timer.cancel();
+        setState(() {}); // Trigger rebuild to show Resend button
       } else {
         if (mounted) {
           setState(() {
@@ -53,30 +58,53 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
     });
   }
 
+  void _resendOtp(int phoneNo) {
+    context.read<AuthBloc>().add(SendOtpRequestedEvent(phoneNo));
+    _startTimer();
+  }
+
   @override
   void dispose() {
-    for (var controller in _controllers) {
-      controller.dispose();
-    }
-    for (var node in _focusNodes) {
-      node.dispose();
-    }
+    for (var controller in _controllers) controller.dispose();
+    for (var node in _focusNodes) node.dispose();
     _timer?.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final phoneNo = int.tryParse(widget.phoneNo.trim());
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
       body: BlocConsumer<AuthBloc, AuthState>(
-        listener: (context, state) {},
+        listener: (context, state) {
+          if (state is AuthVerifyOtpState) {
+            final statusCode = state.otp.code;
+            if (statusCode == 2002) {
+              context.read<AuthBloc>().add(LoginRequestedEvent(phoneNo!));
+              log("Verifed OTP Called,now login api will be fired....");
+            } else if (statusCode == 2003) {
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(state.otp.message)));
+              log("Invalid OTP (2003)");
+            }
+          }
+          if (state is AuthAuthenticatedState) {
+            tokenStorage.saveAccessToken(state.user.access!);
+            tokenStorage.saveRefreshToken(state.user.refresh!);
+
+            log("Access Token Saved: ${state.user.access}");
+            log("Refresh Token Saved: ${state.user.refresh}");
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => HomePage()),
+            );
+          }
+        },
         builder: (context, state) {
-          final isLoading = state is AuthLoadingState;
-          if (state is AuthLoadingState){
+          if (state is AuthLoadingState) {
             return const Center(child: CircularProgressIndicator());
-          } else if (state is AuthVerifyOtpState){
-            
           }
           return SafeArea(
             child: Padding(
@@ -92,15 +120,16 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
                     ),
                     child: IconButton(
                       onPressed: () {
-                        Navigator.pushReplacementNamed(
+                        Navigator.pushReplacement(
                           context,
-                          AppRoutes.login,
+                          MaterialPageRoute(builder: (context) => LoginPage()),
                         );
                       },
                       icon: const Icon(Icons.arrow_back),
                     ),
                   ),
                   const SizedBox(height: 20),
+
                   Text(
                     "Verify OTP",
                     style: AppFonts.lexendExtraBold.copyWith(fontSize: 30),
@@ -114,6 +143,7 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
                     ),
                   ),
                   const SizedBox(height: 60),
+
                   // OTP Input Fields
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -162,69 +192,78 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
                     }),
                   ),
 
-                  const SizedBox(height: 20),
+                 
                   Center(
-                    child: Text(
-                      "Didn't receive OTP?",
-                      style: AppFonts.lexendBold.copyWith(
-                        fontSize: 14,
-                        color: Colors.grey.shade500,
-                      ),
-                    ),
+                    child: _secondsRemaining > 0
+                        ? Padding(
+                          padding: const EdgeInsets.only(top: 30.0),
+                          child: Text(
+                              "00:${_secondsRemaining.toString().padLeft(2, '0')}",
+                              style: AppFonts.lexendBold.copyWith(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                        )
+                        : Column(
+                            children: [
+                              SizedBox(height: 20),
+                              Text(
+                                "Didn't receive OTP?",
+                                style: AppFonts.lexendBold.copyWith(
+                                  fontSize: 16,
+                                  color: Colors.grey.shade500,
+                                ),
+                              ),
+                              SizedBox(height: 10),
+
+                              GestureDetector(
+                                onTap: () {
+                                  _resendOtp(phoneNo!);
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 8,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.orange,
+                                    borderRadius: BorderRadius.circular(8),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.2),
+                                        blurRadius: 8,
+                                        offset: const Offset(2, 4),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Text(
+                                    "Resend OTP",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                   ),
-                  const SizedBox(height: 10),
-                  Center(
-                    child: Text(
-                      "00:${_secondsRemaining.toString().padLeft(2, '0')}",
-                      style: AppFonts.lexendBold.copyWith(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
+
                   const Spacer(),
 
-                  // Verify OTP Button
+                  // Verify OTP Buttons
                   CustomButton(
                     text: "Verify OTP",
                     onPressed: () {
-                      isLoading
-                          ? null
-                          : () {
-                              final phoneNo = widget.phoneNo;
-                              final parsedPhoneNo = int.tryParse(phoneNo);
+                      final otp = _controllers.map((e) => e.text).join();
+                      final parsedOtp = int.tryParse(otp);
 
-                              // Collect OTP entered by user
-                              final otp = _controllers
-                                  .map((c) => c.text)
-                                  .join();
-                              final parsedOtp = int.tryParse(otp);
-
-                              // Verify OTP length
-                              if (otp.length == otpLength) {
-                                context.read<AuthBloc>().add(
-                                  VerifyOtpRequestedEvent(
-                                    parsedPhoneNo!,
-                                    parsedOtp!,
-                                  ),
-                                );
-                                context.read<AuthBloc>().add(
-                                  LoginRequestedEvent(parsedPhoneNo),
-                                );
-                                context.read<AuthBloc>().add(
-                                  RegisterRequestedEvent(
-                                    parsedPhoneNo,
-                                    "Customer",
-                                  ),
-                                );
-                              } else if (_otp.map((e) => e.status) == 2003) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text("Please enter a valid OTP"),
-                                  ),
-                                );
-                              }
-                            };
+                      if (parsedOtp != null) {
+                        context.read<AuthBloc>().add(
+                          VerifyOtpRequestedEvent(phoneNo!, parsedOtp),
+                        );
+                      }
                     },
                   ),
                 ],
@@ -235,4 +274,5 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
       ),
     );
   }
+  
 }

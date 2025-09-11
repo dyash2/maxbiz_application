@@ -43,6 +43,7 @@ class AuthInitialState extends AuthState {}
 
 class AuthLoadingState extends AuthState {}
 
+
 class AuthSentOtpState extends AuthState {
   final Otp otp;
   const AuthSentOtpState(this.otp);

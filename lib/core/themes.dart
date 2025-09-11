@@ -63,7 +63,11 @@ class AppFonts {
 }
 
 class AppColors {
-  static const Color primaryColor = Color(0xFF4CAF50); // Example primary color
-  static const Color accentColor = Color(0xFFFFC107); // Example accent color
-  static const Color textSecondaryColor = Color.fromARGB(252, 204, 153, 44); // Example text color
+  static const Color primaryColor = Color.fromARGB(248, 228, 181, 51);
+  static const Color accentColor = Color(0xFFFFC107);
+  static const Color textSecondaryColor = Color.fromARGB(248, 228, 181, 51);
+}
+
+class ButtonColor {
+  static final Color bgColor = Colors.blueGrey.shade300;
 }

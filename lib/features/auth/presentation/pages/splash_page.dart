@@ -1,8 +1,12 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:maxbazaar/core/themes.dart';
+import 'package:maxbazaar/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:maxbazaar/features/auth/presentation/bloc/auth_state.dart';
 import 'package:maxbazaar/features/auth/presentation/pages/login_page.dart';
 import 'package:maxbazaar/features/auth/presentation/widgets/splash_animation_widget.dart';
+import 'package:maxbazaar/features/home/presentation/pages/home_page.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:lottie/lottie.dart';
 
@@ -52,7 +56,7 @@ class _SplashPageState extends State<SplashPage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Lottie.asset(
-                "assets/lottie/location.json",
+                "assets/lottie/locationUser.json",
                 height: 100,
                 width: 100,
               ),
@@ -112,6 +116,23 @@ class _SplashPageState extends State<SplashPage> {
 
   @override
   Widget build(BuildContext context) {
-    return SplashAnimationWidget();
+    return BlocConsumer<AuthBloc, AuthState>(
+      listener: (context, state) {
+        if (state is AuthInitialState) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => LoginPage()),
+          );
+        } else if (state is AuthAuthenticatedState) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => HomePage()),
+          );
+        }
+      },
+      builder: (context, state) {
+        return SplashAnimationWidget();
+      },
+    );
   }
 }

@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:maxbazaar/core/utils/constants.dart';
+import 'package:maxbazaar/core/utils/constants/constants.dart';
 import 'package:maxbazaar/features/auth/data/models/otp_model.dart';
 import '../models/login_model.dart';
 
@@ -38,9 +38,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       Constants.registerPath,
       data: {'phone_no': phoneNo, 'role': role},
       options: Options(
-        headers: {
-          if (accessToken != null) 'Authorization': 'Bearer $accessToken',
-        },
+        // headers: {
+        //   if (accessToken != null) 'Authorization': 'Bearer $accessToken',
+        // },
       ),
     );
     return LoginModel.fromJson(res.data as Map<String, dynamic>);

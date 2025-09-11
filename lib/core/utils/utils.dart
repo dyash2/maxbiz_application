@@ -1,71 +1,86 @@
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:maxbazaar/core/themes.dart';
 
-class SnackBarUtils {
-  /// Show a success snackbar
-  static void showSuccess(BuildContext context, String message) {
-    _showSnackBar(
-      context,
-      message,
-      backgroundColor: Colors.green,
-      icon: Icons.check_circle,
-    );
-  }
+class Utils {
+  /// Show location permission modal
+  static void showPermissionModal(BuildContext context) {
+    bool permanentlyDenied = false;
 
-  /// Show an error snackbar
-  static void showError(BuildContext context, String message) {
-    _showSnackBar(
-      context,
-      message,
-      backgroundColor: Colors.red,
-      icon: Icons.error,
-    );
-  }
-
-  // Show an warning snackbar
-  static void showWarning(BuildContext context, String message) {
-    _showSnackBar(
-      context,
-      message,
-      backgroundColor: Colors.orange,
-      icon: Icons.warning,
-    );
-  }
-
-  /// Show an info snackbar
-  static void showInfo(BuildContext context, String message) {
-    _showSnackBar(
-      context,
-      message,
-      backgroundColor: Colors.blue,
-      icon: Icons.info,
-    );
-  }
-
-  /// Base snackbar builder
-  static void _showSnackBar(
-    BuildContext context,
-    String message, {
-    required Color backgroundColor,
-    required IconData icon,
-  }) {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            Icon(icon, color: Colors.white),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(message, style: const TextStyle(color: Colors.white)),
-            ),
-          ],
-        ),
-        backgroundColor: backgroundColor,
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.all(12),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        duration: const Duration(seconds: 2),
+    showModalBottomSheet(
+      context: context,
+      isDismissible: false,
+      enableDrag: false,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Lottie.asset(
+                "assets/lottie/locationUser.json",
+                height: 100,
+                width: 100,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                "Your Device's Location Service Is Off.",
+                style: AppFonts.lexendExtraBold.copyWith(fontSize: 18),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                "To ensure the best delivery service, please enable location permission",
+                textAlign: TextAlign.center,
+                style: AppFonts.lexendBold.copyWith(
+                  fontSize: 15,
+                  fontWeight: FontWeight.normal,
+                ),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange.shade700,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  onPressed: () async {
+                    Navigator.pop(context);
+
+                    final status = await Permission.location.request();
+
+                    if (status.isGranted) {
+                      debugPrint("✅ Location granted after retry");
+                    } else if (status.isPermanentlyDenied) {
+                      permanentlyDenied = true;
+                      await openAppSettings();
+                    } else {
+                      Future.delayed(
+                        const Duration(milliseconds: 300),
+                        () => showPermissionModal(context),
+                      );
+                    }
+                  },
+                  child: Text(
+                    permanentlyDenied ? "Open Settings" : "Use My Location",
+                    style: AppFonts.lexendBold.copyWith(
+                      fontSize: 18,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
